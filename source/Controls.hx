@@ -384,7 +384,8 @@ class Controls extends FlxActionSet
 	}
 	#end
 		
-		public var trackedinputs:Array<FlxActionInput> = [];
+	public var trackedinputs:Array<FlxActionInput> = [];
+	public var trackNoteInput:Array<FlxActionInput> = [];
 
 	public function addbutton(action:FlxActionDigital, button:FlxButton, state:FlxInputState) {
 		var input = new FlxActionInputDigitalIFlxInput(button, state);
@@ -394,12 +395,19 @@ class Controls extends FlxActionSet
 		//action.addInput(button, state);
 	}
 	
+	public function buttoninputs(action:FlxActionDigital, button:FlxButton, state:FlxInputState) {
+		var inputs = new FlxActionInputDigitalIFlxInput(button state);
+		trackNoteInput.push(inputs);
+		
+		action.add(inputs);
+	}
+	
 	public function setHitBox(hitbox:Hitbox) 
 	{
-	        inline forEachBound(Control.NOTE_UP, (action, state) -> addbutton(action, hitbox.buttonUp, state));
-		inline forEachBound(Control.NOTE_DOWN, (action, state) -> addbutton(action, hitbox.buttonDown, state));
-		inline forEachBound(Control.NOTE_LEFT, (action, state) -> addbutton(action, hitbox.buttonLeft, state));
-		inline forEachBound(Control.NOTE_RIGHT, (action, state) -> addbutton(action, hitbox.buttonRight, state));	
+	        inline forEachBound(Control.NOTE_UP, (action, state) -> buttoninputs(action, hitbox.buttonUp, state));
+		inline forEachBound(Control.NOTE_DOWN, (action, state) -> buttoninputs(action, hitbox.buttonDown, state));
+		inline forEachBound(Control.NOTE_LEFT, (action, state) -> buttoninputs(action, hitbox.buttonLeft, state));
+		inline forEachBound(Control.NOTE_RIGHT, (action, state) -> buttoninputs(action, hitbox.buttonRight, state));	
 	}
 	
 	public function setVirtualNotePad(virtualPad:FlxVirtualPad, ?DPad:FlxDPadMode, ?Action:FlxActionMode) {
@@ -411,20 +419,20 @@ class Controls extends FlxActionSet
 		switch (DPad)
 		{
 			case UP_DOWN:
-				inline forEachBound(Control.NOTE_UP, (action, state) -> addbutton(action, virtualPad.buttonUp, state));
-				inline forEachBound(Control.NOTE_DOWN, (action, state) -> addbutton(action, virtualPad.buttonDown, state));
+				inline forEachBound(Control.NOTE_UP, (action, state) -> buttoninputs(action, virtualPad.buttonUp, state));
+				inline forEachBound(Control.NOTE_DOWN, (action, state) -> buttoninputs(action, virtualPad.buttonDown, state));
 			case LEFT_RIGHT:
-			        inline forEachBound(Control.NOTE_LEFT, (action, state) -> addbutton(action, virtualPad.buttonLeft, state));
-				inline forEachBound(Control.NOTE_RIGHT, (action, state) -> addbutton(action, virtualPad.buttonRight, state));
+			        inline forEachBound(Control.NOTE_LEFT, (action, state) -> buttoninputs(action, virtualPad.buttonLeft, state));
+				inline forEachBound(Control.NOTE_RIGHT, (action, state) -> buttoninputs(action, virtualPad.buttonRight, state));
 			case UP_LEFT_RIGHT:
-				inline forEachBound(Control.NOTE_UP, (action, state) -> addbutton(action, virtualPad.buttonUp, state));
-				inline forEachBound(Control.NOTE_LEFT, (action, state) -> addbutton(action, virtualPad.buttonLeft, state));
-				inline forEachBound(Control.NOTE_RIGHT, (action, state) -> addbutton(action, virtualPad.buttonRight, state));
+				inline forEachBound(Control.NOTE_UP, (action, state) -> buttoninputs(action, virtualPad.buttonUp, state));
+				inline forEachBound(Control.NOTE_LEFT, (action, state) -> buttoninputs(action, virtualPad.buttonLeft, state));
+				inline forEachBound(Control.NOTE_RIGHT, (action, state) -> buttoninputs(action, virtualPad.buttonRight, state));
 			case FULL | RIGHT_FULL:
-				inline forEachBound(Control.NOTE_UP, (action, state) -> addbutton(action, virtualPad.buttonUp, state));
-				inline forEachBound(Control.NOTE_DOWN, (action, state) -> addbutton(action, virtualPad.buttonDown, state));
-				inline forEachBound(Control.NOTE_LEFT, (action, state) -> addbutton(action, virtualPad.buttonLeft, state));
-				inline forEachBound(Control.NOTE_RIGHT, (action, state) -> addbutton(action, virtualPad.buttonRight, state));
+				inline forEachBound(Control.NOTE_UP, (action, state) -> buttoninputs(action, virtualPad.buttonUp, state));
+				inline forEachBound(Control.NOTE_DOWN, (action, state) -> buttoninputs(action, virtualPad.buttonDown, state));
+				inline forEachBound(Control.NOTE_LEFT, (action, state) -> buttoninputs(action, virtualPad.buttonLeft, state));
+				inline forEachBound(Control.NOTE_RIGHT, (action, state) -> buttoninputs(action, virtualPad.buttonRight, state));
 			
 			case NONE:
 		}
@@ -496,6 +504,25 @@ class Controls extends FlxActionSet
 
 	public function removeFlxInput(Tinputs) {
 		for (action in this.digitalActions)
+		{
+			var i = action.inputs.length;
+			
+			while (i-- > 0)
+			{
+				var input = action.inputs[i];
+				/*if (input.device == IFLXINPUT_OBJECT)
+					action.remove(input);*/
+
+				var x = Tinputs.length;
+				while (x-- > 0)
+					//if (Tinputs[x] == input)
+						action.remove(input);
+			}
+		}
+	}
+				
+	public function removeFlxNoteInput(inputs) {
+	        for (action in this.digitalActions)
 		{
 			var i = action.inputs.length;
 			
