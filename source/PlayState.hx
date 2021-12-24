@@ -49,6 +49,10 @@ import Achievements;
 import StageData;
 import FunkinLua;
 import DialogueBoxPsych;
+#if mobileC
+import ui.Mobilecontrols;
+import flixel.input.actions.FlxActionInput as Input;
+#end
 
 #if sys
 import sys.FileSystem;
@@ -58,6 +62,11 @@ using StringTools;
 
 class PlayState extends MusicBeatState
 {
+	#if mobileC
+	var mcontrols:Mobilecontrols;
+	var trackNoteInput:Array<Input> = [];
+	#end
+
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 
@@ -273,7 +282,7 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		#if MODS_ALLOWED
-		Paths.destroyLoadedImages(resetSpriteCache);
+		Paths.LoadedImages(resetSpriteCache);
 		#end
 		resetSpriteCache = false;
 
@@ -994,6 +1003,26 @@ class PlayState extends MusicBeatState
 		timeBarBG.cameras = [camHUD];
 		timeTxt.cameras = [camHUD];
 		doof.cameras = [camHUD];
+		
+		#if mobileC
+		mcontrols = new Mobilecontrols();
+		switch(mcontrols.mode) {
+			case VIRTUALPAD_RIGHT | VIRTUALPAD_LEFT | VIRTUALPAD_CUSTOM:
+				controls.setVirtualNotePad(mcontrols._virtualPad, FULL, NONE);
+			case HITBOX:
+				controls.setHitbox(mcontrols._hitbox);
+			default:
+		}
+		trackNoteInput = controls.trackNoteInput;
+		controls.trackNoteInput = [];
+		
+		var camControl = new FlxCamera();
+		camControl.bgColor.alpha = 0;
+		FlxG.cameras.add(camControl);
+		
+		mcontrols.visible = false; mcontrols.cameras = [camControl];
+		add(mcontrols);
+		#end
 
 		// if (SONG.song == 'South')
 		// FlxG.camera.alpha = 0.7;
@@ -4090,6 +4119,9 @@ class PlayState extends MusicBeatState
 			luaArray[i].stop();
 		}
 		luaArray = [];
+		#if mobileC
+		controls.removeFlxNoteInput(trackNoteInput);
+		#end
 		super.destroy();
 	}
 
